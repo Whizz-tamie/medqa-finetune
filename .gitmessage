@@ -1,0 +1,14 @@
+# <type>(<scope>): <subject>
+# |      |        |
+# |      |        └─> Summary in present tense (e.g., "add ChatML formatter")
+# |      └─> Context (data, model, config, scripts, deps)
+# └─> feat, fix, chore, docs, style, perf, refactor, test
+
+# --- Optional Body (Explain WHY, not how) ---
+# For experiments, include key changes:
+# - LoRA Rank: 
+# - Learning Rate: 
+# - Dataset Split: 
+
+# --- Footer ---
+# Reference Issue IDs or "Closes #123"
