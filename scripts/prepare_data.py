@@ -18,9 +18,9 @@ OUTPUT_DIR = "data"
 
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-def build_chat_messages(example):
+def build_prompt_and_completion(example):
     """
-    Constructs a ChatML-compatible message list.
+    Constructs a conversational prompt-completion pair.
     """
     options = example['options']
     
@@ -37,18 +37,22 @@ Answer with the letter (A, B, C, or D) preceded by ####."""
 
     target_content = f"#### {example['answer_idx']}"
 
-    return [
+    prompt = [
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": user_content},
-        {"role": "assistant", "content": target_content}
     ]
+    completion = [
+        {"role": "assistant", "content": target_content},
+    ]
+
+    return {"prompt": prompt, "completion": completion}
 
 # Process and Save as JSONL
 def export_to_jsonl(dataset, filename):
     with open(filename, "w", encoding="utf-8") as f:
         for example in tqdm(dataset, desc=f"Exporting {os.path.basename(filename)}"):
-            messages = build_chat_messages(example)
-            json_line = json.dumps({"messages": messages}, ensure_ascii=False)
+            formatted_example = build_prompt_and_completion(example)
+            json_line = json.dumps(formatted_example, ensure_ascii=False)
             f.write(json_line + "\n")
     print(f"Saved {len(dataset)} examples to {filename}")
 
