@@ -6,7 +6,7 @@ Fine-tune `Qwen/Qwen2.5-7B-Instruct` on MedQA USMLE-style multiple-choice questi
 
 This project turns the MedQA dataset into conversational prompt-completion examples and trains a Qwen instruct model to answer with the correct option letter in the format `#### A`.
 
-By default, full training targets `Qwen/Qwen2.5-7B-Instruct`. The smaller `Qwen/Qwen2.5-0.5B-Instruct` model is used only for local smoke tests.
+By default, full training targets `Qwen/Qwen2.5-7B-Instruct`. Smoke tests also use `Qwen/Qwen2.5-7B-Instruct` when CUDA is available, and fall back to `Qwen/Qwen2.5-0.5B-Instruct` on non-CUDA machines.
 
 The current workflow is:
 
@@ -21,7 +21,7 @@ The current workflow is:
 - LoRA fine-tuning with PEFT
 - TRL `SFTTrainer` training loop
 - Safer `--test` mode for local validation
-- Device-aware runtime settings for CUDA, Apple MPS, and CPU
+- Device-aware runtime settings for CUDA and non-CUDA environments
 
 ## Quickstart
 
@@ -59,7 +59,8 @@ python main.py train --test
 
 Smoke test mode:
 
-- swaps to `Qwen/Qwen2.5-0.5B-Instruct`
+- uses `Qwen/Qwen2.5-7B-Instruct` on CUDA
+- falls back to `Qwen/Qwen2.5-0.5B-Instruct` on non-CUDA machines
 - uses a small subset of the data
 - uses a reduced-memory config
 - runs only 5 training steps
@@ -98,7 +99,8 @@ This preserves chat roles while allowing `completion_only_loss=True` during trai
 ## Training Setup
 
 - Full training model: `Qwen/Qwen2.5-7B-Instruct`
-- Smoke test model: `Qwen/Qwen2.5-0.5B-Instruct`
+- Smoke test model on CUDA: `Qwen/Qwen2.5-7B-Instruct`
+- Smoke test model on non-CUDA: `Qwen/Qwen2.5-0.5B-Instruct`
 - Trainer: TRL `SFTTrainer`
 - Fine-tuning method: LoRA via PEFT
 - Loss setup: completion-only loss
@@ -107,7 +109,7 @@ This preserves chat roles while allowing `completion_only_loss=True` during trai
 Runtime behavior:
 
 - CUDA uses `bfloat16` and fused AdamW
-- Apple MPS and CPU use `float32` and standard AdamW
+- Non-CUDA environments use `float32` and standard AdamW
 
 Local smoke tests are intended for pipeline validation, not for judging final model quality. For reliable training results, use a CUDA machine.
 
@@ -139,7 +141,7 @@ python main.py --help
 ## Limitations
 
 - `main.py` includes an `eval` command, but `scripts/eval.py` is not implemented yet.
-- Apple Silicon smoke tests may still produce unstable metrics even when the training loop completes successfully.
+- Non-CUDA runs are mainly intended for smoke testing, not meaningful training evaluation.
 - This repo currently focuses on preparation and training rather than evaluation or deployment.
 
 ## Key Files

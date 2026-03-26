@@ -1,4 +1,3 @@
-import sys
 import argparse
 import torch
 from datasets import load_dataset
@@ -25,8 +24,8 @@ CONFIG = {
     "grad_accum": 4,
 }
 
+# Test overrides for quick smoke testing
 TEST_CONFIG_OVERRIDES = {
-    "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
     "max_length": 256,
     "batch_size": 1,
     "grad_accum": 1,
@@ -43,16 +42,6 @@ def get_runtime_settings():
             "optim": "adamw_torch_fused",
             "device_map": "auto",
             "target_device": None,
-        }
-
-    if torch.backends.mps.is_available():
-        return {
-            "device_name": "MPS",
-            "torch_dtype": torch.float32,
-            "bf16": False,
-            "optim": "adamw_torch",
-            "device_map": None,
-            "target_device": "mps",
         }
 
     return {
@@ -99,6 +88,8 @@ def get_model(model_id, runtime_settings):
 def run_training(is_test=False):
     run_config = {**CONFIG, **TEST_CONFIG_OVERRIDES} if is_test else CONFIG
     runtime_settings = get_runtime_settings()
+    if is_test and not torch.cuda.is_available():
+        run_config["model_id"] = "Qwen/Qwen2.5-0.5B-Instruct"
 
     tokenizer = AutoTokenizer.from_pretrained(run_config["model_id"])
     tokenizer.pad_token = tokenizer.eos_token
