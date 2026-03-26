@@ -26,7 +26,7 @@ CONFIG = {
 
 # Test overrides for quick smoke testing
 TEST_CONFIG_OVERRIDES = {
-    "max_length": 256,
+    "max_length": 512,
     "batch_size": 1,
     "grad_accum": 1,
     "learning_rate": 1e-5,
@@ -42,6 +42,7 @@ def get_runtime_settings():
             "optim": "adamw_torch_fused",
             "device_map": "auto",
             "target_device": None,
+            "use_cpu": False,
         }
 
     return {
@@ -51,6 +52,7 @@ def get_runtime_settings():
         "optim": "adamw_torch",
         "device_map": None,
         "target_device": "cpu",
+        "use_cpu": True,
     }
 
 
@@ -123,6 +125,7 @@ def run_training(is_test=False):
         lr_scheduler_type="cosine",
         optim=runtime_settings["optim"],
         bf16=runtime_settings["bf16"],
+        use_cpu=runtime_settings["use_cpu"],
 
         # --- Evaluation & Saving ---
         eval_strategy="steps",
