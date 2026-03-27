@@ -1,0 +1,33 @@
+{
+  "os": "macOS-26.3.1-arm64-arm-64bit-Mach-O",
+  "python": "CPython 3.13.1",
+  "startedAt": "2026-03-27T18:39:28.618597Z",
+  "args": [
+    "--test",
+    "--wandb"
+  ],
+  "program": "/Users/godblessjames/dev/medqa-finetune/scripts/train.py",
+  "codePath": "scripts/train.py",
+  "codePathLocal": "scripts/train.py",
+  "git": {
+    "remote": "git@github.com:Whizz-tamie/medqa-finetune.git",
+    "commit": "471a1f94bd5c28e489173ddba0cbbb6d4e186445"
+  },
+  "email": "gtj21@cantab.ac.uk",
+  "root": "/Users/godblessjames/dev/medqa-finetune",
+  "host": "Godblesss-MacBook-Air-3.local",
+  "executable": "/Users/godblessjames/dev/medqa-finetune/.venv/bin/python3",
+  "cpu_count": 8,
+  "cpu_count_logical": 8,
+  "disk": {
+    "/": {
+      "total": "245107195904",
+      "used": "232063074304"
+    }
+  },
+  "memory": {
+    "total": "8589934592"
+  },
+  "apple": {},
+  "writerId": "yi53qg4oc7a9dg3vowvdrf3r5g57wckb"
+}

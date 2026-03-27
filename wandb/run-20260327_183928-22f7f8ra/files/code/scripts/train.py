@@ -1,5 +1,4 @@
 import argparse
-import os
 import torch
 from datasets import load_dataset
 from peft import LoraConfig, TaskType
@@ -27,6 +26,7 @@ CONFIG = {
 
 # Test overrides for quick smoke testing
 TEST_CONFIG_OVERRIDES = {
+    "max_length": 512,
     "batch_size": 1,
     "grad_accum": 1,
     "learning_rate": 1e-5,
@@ -95,8 +95,6 @@ def run_training(is_test=False, enable_wandb=False):
 
     report_to = "wandb" if (enable_wandb or not is_test) else "none"
     run_name = "qwen-medqa-lora-smoke" if (is_test and enable_wandb) else "qwen-medqa-lora"
-    if report_to == "wandb":
-        os.environ.setdefault("WANDB_PROJECT", "medqa-qwen-finetune")
 
     tokenizer = AutoTokenizer.from_pretrained(run_config["model_id"])
     tokenizer.pad_token = tokenizer.eos_token
@@ -117,6 +115,7 @@ def run_training(is_test=False, enable_wandb=False):
 
     sft_config = SFTConfig(
         # --- Identification & Reporting ---
+        project="medqa-qwen-finetune",
         run_name=run_name,
         report_to=report_to,
         output_dir=CONFIG["output_dir"],

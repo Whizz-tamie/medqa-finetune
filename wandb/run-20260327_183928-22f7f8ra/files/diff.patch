@@ -1,0 +1,106 @@
+diff --git a/README.md b/README.md
+index 2a68e3f..20e138f 100644
+--- a/README.md
++++ b/README.md
+@@ -66,6 +66,14 @@ Smoke test mode:
+ - runs only 5 training steps
+ - does not save checkpoints or a final model
+ 
++To test Weights & Biases logging without launching a full run:
++
++```bash
++python main.py train --test --wandb
++```
++
++This keeps the smoke-test behavior but enables W&B logging with the fixed run name `qwen-medqa-lora-smoke`.
++
+ ### Run full training
+ 
+ ```bash
+@@ -120,6 +128,7 @@ The repo uses [`main.py`](/Users/godblessjames/dev/medqa-finetune/main.py) as a
+ ```bash
+ python main.py prepare
+ python main.py train --test
++python main.py train --test --wandb
+ python main.py train
+ python main.py --help
+ ```
+diff --git a/main.py b/main.py
+index 6fe0b53..d444437 100644
+--- a/main.py
++++ b/main.py
+@@ -26,14 +26,14 @@ def run_script(path, extra_args=None):
+ 
+ def main():
+     if len(sys.argv) < 2:
+-        print("Usage: python main.py [prepare|train|eval] [--test]")
++        print("Usage: python main.py [prepare|train|eval] [--test] [--wandb]")
+         sys.exit(1)
+ 
+     # Handle help anywhere in args
+     if any(arg in ["-h", "--help"] for arg in sys.argv):
+-        print("Usage: python main.py [prepare|train|eval] [--test]")
++        print("Usage: python main.py [prepare|train|eval] [--test] [--wandb]")
+         print("  prepare: Download and preprocess MedQA data")
+-        print("  train:   Start LoRA fine-tuning (Add --test for a smoke run)")
++        print("  train:   Start LoRA fine-tuning (Add --test for a smoke run, --wandb to log smoke tests)")
+         print("  eval:    Run inference and check accuracy")
+         sys.exit(0)
+ 
+@@ -60,4 +60,4 @@ def main():
+         sys.exit(1)
+ 
+ if __name__ == "__main__":
+-    main()
+\ No newline at end of file
++    main()
+diff --git a/scripts/train.py b/scripts/train.py
+index d03a3ab..1290463 100644
+--- a/scripts/train.py
++++ b/scripts/train.py
+@@ -87,12 +87,15 @@ def get_model(model_id, runtime_settings):
+     return model, peft_config
+ 
+ # Training pipeline
+-def run_training(is_test=False):
++def run_training(is_test=False, enable_wandb=False):
+     run_config = {**CONFIG, **TEST_CONFIG_OVERRIDES} if is_test else CONFIG
+     runtime_settings = get_runtime_settings()
+     if is_test and not torch.cuda.is_available():
+         run_config["model_id"] = "Qwen/Qwen2.5-0.5B-Instruct"
+ 
++    report_to = "wandb" if (enable_wandb or not is_test) else "none"
++    run_name = "qwen-medqa-lora-smoke" if (is_test and enable_wandb) else "qwen-medqa-lora"
++
+     tokenizer = AutoTokenizer.from_pretrained(run_config["model_id"])
+     tokenizer.pad_token = tokenizer.eos_token
+     tokenizer.padding_side = "right"
+@@ -113,8 +116,8 @@ def run_training(is_test=False):
+     sft_config = SFTConfig(
+         # --- Identification & Reporting ---
+         project="medqa-qwen-finetune",
+-        run_name="qwen-medqa-lora",
+-        report_to="none" if is_test else "wandb",
++        run_name=run_name,
++        report_to=report_to,
+         output_dir=CONFIG["output_dir"],
+ 
+         # --- Training Hyperparameters ---
+@@ -160,6 +163,8 @@ def run_training(is_test=False):
+         print(
+             "[INFO] Smoke test config: "
+             f"model={run_config['model_id']}, "
++            f"report_to={report_to}, "
++            f"run_name={run_name}, "
+             f"batch_size={run_config['batch_size']}, "
+             f"grad_accum={run_config['grad_accum']}, "
+             f"max_length={run_config['max_length']}, "
+@@ -183,6 +188,7 @@ def run_training(is_test=False):
+ if __name__ == "__main__":
+     parser = argparse.ArgumentParser()
+     parser.add_argument("--test", action="store_true", help="Run in smoke test mode")
++    parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging for smoke tests")
+     args, _ = parser.parse_known_args()
+     
+-    run_training(is_test=args.test)
++    run_training(is_test=args.test, enable_wandb=args.wandb)

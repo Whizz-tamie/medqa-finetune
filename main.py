@@ -26,14 +26,14 @@ def run_script(path, extra_args=None):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python main.py [prepare|train|eval] [--test]")
+        print("Usage: python main.py [prepare|train|eval] [--test] [--wandb]")
         sys.exit(1)
 
     # Handle help anywhere in args
     if any(arg in ["-h", "--help"] for arg in sys.argv):
-        print("Usage: python main.py [prepare|train|eval] [--test]")
+        print("Usage: python main.py [prepare|train|eval] [--test] [--wandb]")
         print("  prepare: Download and preprocess MedQA data")
-        print("  train:   Start LoRA fine-tuning (Add --test for a smoke run)")
+        print("  train:   Start LoRA fine-tuning (Add --test for a smoke run, --wandb to log smoke tests)")
         print("  eval:    Run inference and check accuracy")
         sys.exit(0)
 

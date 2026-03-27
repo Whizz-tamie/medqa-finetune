@@ -66,6 +66,14 @@ Smoke test mode:
 - runs only 5 training steps
 - does not save checkpoints or a final model
 
+To test Weights & Biases logging without launching a full run:
+
+```bash
+python main.py train --test --wandb
+```
+
+This keeps the smoke-test behavior but enables W&B logging with the fixed run name `qwen-medqa-lora-smoke`.
+
 ### Run full training
 
 ```bash
@@ -120,6 +128,7 @@ The repo uses [`main.py`](/Users/godblessjames/dev/medqa-finetune/main.py) as a 
 ```bash
 python main.py prepare
 python main.py train --test
+python main.py train --test --wandb
 python main.py train
 python main.py --help
 ```
