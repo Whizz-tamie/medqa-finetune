@@ -6,6 +6,7 @@ dist/
 wheels/
 *.egg-info
 .uv-cache/
+wandb/
 
 # Virtual environments
 .venv
