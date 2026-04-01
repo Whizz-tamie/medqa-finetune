@@ -99,6 +99,7 @@ def main():
     parser.add_argument("--max-samples", type=int, default=None, help="Optional cap on the number of examples")
     parser.add_argument("--max-new-tokens", type=int, default=8, help="Maximum number of tokens to generate")
     parser.add_argument("--show-samples", type=int, default=5, help="Number of sample predictions to print")
+    parser.add_argument("--wandb-samples", type=int, default=200, help="Number of sample predictions to log to W&B")
     parser.add_argument("--wandb", action="store_true", help="Log evaluation metrics to Weights & Biases")
     parser.add_argument("--wandb-run-name", default=None, help="Optional override for the W&B run name")
     args = parser.parse_args()
@@ -229,7 +230,8 @@ def main():
                 f"text={prediction['generated_text']!r}"
             )
 
-    if wandb_run is not None and sample_count:
+    wandb_sample_count = min(args.wandb_samples, total)
+    if wandb_run is not None and wandb_sample_count:
         sample_table = wandb.Table(
             columns=[
                 "question",
@@ -241,7 +243,7 @@ def main():
                 "generated_text",
             ]
         )
-        for prediction in predictions[:sample_count]:
+        for prediction in predictions[:wandb_sample_count]:
             sample_table.add_data(
                 prediction["question"],
                 prediction["expected"],
