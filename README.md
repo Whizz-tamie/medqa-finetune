@@ -13,6 +13,7 @@ The current workflow is:
 1. Download and preprocess MedQA into JSONL files
 2. Run a lightweight local smoke test
 3. Launch full LoRA fine-tuning
+4. Evaluate either the trained adapter or a standalone model
 
 ## Features
 
@@ -20,6 +21,7 @@ The current workflow is:
 - Conversational prompt-completion training format
 - LoRA fine-tuning with PEFT
 - TRL `SFTTrainer` training loop
+- Reusable evaluation script for adapters and standalone models
 - Safer `--test` mode for local validation
 - Device-aware runtime settings for CUDA and non-CUDA environments
 
@@ -66,7 +68,13 @@ Smoke test mode:
 - runs only 5 training steps
 - does not save checkpoints or a final model
 
-To test Weights & Biases logging without launching a full run:
+To use Weights & Biases, authenticate first:
+
+```bash
+wandb login
+```
+
+Then, to test Weights & Biases logging without launching a full run:
 
 ```bash
 python main.py train --test --wandb
@@ -85,6 +93,30 @@ The LoRA adapter is written to:
 ```text
 outputs/qwen-medqa-adapter
 ```
+
+### Evaluate a trained adapter
+
+```bash
+python main.py eval
+```
+
+### Evaluate a standalone model
+
+```bash
+python main.py eval --model-path Qwen/Qwen2.5-0.5B-Instruct --max-samples 20
+```
+
+### Log evaluation results to W&B
+
+```bash
+python main.py eval --wandb
+```
+
+Evaluation supports:
+
+- saved LoRA adapters via `--adapter-path`
+- standalone models via `--model-path`
+- optional W&B logging via `--wandb`
 
 ## Dataset Format
 
@@ -130,6 +162,9 @@ python main.py prepare
 python main.py train --test
 python main.py train --test --wandb
 python main.py train
+python main.py eval
+python main.py eval --model-path Qwen/Qwen2.5-0.5B-Instruct --max-samples 20
+python main.py eval --wandb
 python main.py --help
 ```
 
@@ -141,23 +176,19 @@ python main.py --help
 ├── notebooks/             # Exploratory data analysis
 ├── scripts/
 │   ├── prepare_data.py    # Dataset download + preprocessing
-│   └── train.py           # LoRA fine-tuning script
+│   ├── train.py           # LoRA fine-tuning script
+│   └── eval.py            # Adapter / model evaluation script
 ├── main.py                # CLI entry point
 ├── pyproject.toml         # Dependencies and project metadata
 └── README.md
 ```
-
-## Limitations
-
-- `main.py` includes an `eval` command, but `scripts/eval.py` is not implemented yet.
-- Non-CUDA runs are mainly intended for smoke testing, not meaningful training evaluation.
-- This repo currently focuses on preparation and training rather than evaluation or deployment.
 
 ## Key Files
 
 - [`main.py`](/Users/godblessjames/dev/medqa-finetune/main.py)
 - [`scripts/prepare_data.py`](/Users/godblessjames/dev/medqa-finetune/scripts/prepare_data.py)
 - [`scripts/train.py`](/Users/godblessjames/dev/medqa-finetune/scripts/train.py)
+- [`scripts/eval.py`](/Users/godblessjames/dev/medqa-finetune/scripts/eval.py)
 - [`pyproject.toml`](/Users/godblessjames/dev/medqa-finetune/pyproject.toml)
 
 ## License
