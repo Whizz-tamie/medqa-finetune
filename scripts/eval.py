@@ -154,6 +154,7 @@ def main():
     if adapter_path is not None:
         model = PeftModel.from_pretrained(model, adapter_path)
     model.eval()
+    model_input_device = next(model.parameters()).device
 
     examples = load_examples(data_path, max_samples=args.max_samples)
     correct = 0
@@ -171,8 +172,7 @@ def main():
         )
 
         inputs = tokenizer(prompt_text, return_tensors="pt")
-        if runtime_settings["target_device"] is not None:
-            inputs = {k: v.to(runtime_settings["target_device"]) for k, v in inputs.items()}
+        inputs = {k: v.to(model_input_device) for k, v in inputs.items()}
 
         with torch.no_grad():
             output_ids = model.generate(
